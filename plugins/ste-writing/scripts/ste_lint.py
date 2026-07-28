@@ -41,6 +41,24 @@ PP_IRREG = r"(?:done|made|sent|read|built|kept|held|set|put|run|written|shown|gi
 # dictionary are voice, not slop, outside of procedures.
 FLAVORED_DROPS = {"contraction", "banned_word"}
 
+# [MOD 4] Upstream's contraction regex is \w+'(t|re|ve|ll|d|s|m), whose 's branch
+# matches every possessive: "the requirement's owner" scored as 3 contractions in
+# a document containing none. STE does not ban possessives. Match the
+# unambiguous endings anywhere, but 's/'d only on stems where it is a real
+# contraction.
+CONTRACTION = re.compile(
+    r"\b\w+['’](?:t|re|ve|ll|m)\b"
+    r"|\b(?:it|that|there|here|what|who|where|how|this|let|he|she|one)['’][sd]\b",
+    re.I,
+)
+
+# [MOD 5] Fenced blocks must be removed before splitting into paragraphs.
+# A blank line inside a mermaid block splits it across paragraphs, so the
+# ``` fence no longer pairs, strip_code cannot match it, and diagram lines get
+# counted as sentences. Diagram-heavy docs scored several phantom long
+# paragraphs each.
+FENCE = re.compile(r"```.*?```", re.S)
+
 
 def strip_code(t):
     t = re.sub(r"```.*?```", " ", t, flags=re.S)
@@ -82,7 +100,7 @@ def lint(text, mode="strict", emdash=True):
     longs = [(wc(s), s) for s in sents if wc(s) > 20]
     v["long_sentence(>20w)"] = len(longs)
     v["semicolon"] = text.count(";")
-    v["contraction"] = len(re.findall(r"\b\w+['’](?:t|re|ve|ll|d|s|m)\b", text))
+    v["contraction"] = len(CONTRACTION.findall(text))  # [MOD 4]
     v["passive_voice"] = len(re.findall(rf"\b{BE}\s+(?:\w+ed|{PP_IRREG})\b", text, re.I))
     v["ing_main_verb"] = len(re.findall(rf"\b{BE}\s+\w+ing\b", text, re.I))
     v["nominalization"] = len(re.findall(r"\b(?:perform(?:s|ed)?|conduct(?:s|ed)?|provide(?:s|d)?|carry out|carries out|make use of|makes use of)\b", text, re.I)) + len(re.findall(r"\b\w{4,}(?:tion|ment|ance|ence)\s+of\b", text, re.I))
@@ -90,7 +108,9 @@ def lint(text, mode="strict", emdash=True):
     v["banned_word"], bh = count_ci(text, BANNED)
     v["marketing_adjective"], mh = count_ci(text, MARKETING)
     v["modal_hedge"], _ = count_ci(text, MODAL_HEDGE)
-    paras = [p for p in re.split(r"\n\s*\n", raw) if p.strip()]
+    # [MOD 5] Drop fenced blocks before the paragraph split, not after.
+    raw_nocode = FENCE.sub("\n", raw)
+    paras = [p for p in re.split(r"\n\s*\n", raw_nocode) if p.strip()]
     v["long_paragraph(>6s)"] = sum(1 for p in paras if len(sentences(strip_code(p))) > 6)
 
     # [MOD 2] Counted from code-stripped text so em dashes inside fenced blocks
