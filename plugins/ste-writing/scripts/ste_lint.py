@@ -14,6 +14,12 @@ LICENSE-upstream. Local changes, all marked [MOD] below:
   [MOD 3] --mode flavored drops the contraction and dictionary checks, which
           STE-flavored mode explicitly relaxes. Without this the linter scores
           ordinary prose as slop for having a voice.
+  [MOD 4] Possessives are no longer counted as contractions. Upstream's regex
+          scored "the requirement's owner" as a contraction; STE bans neither.
+  [MOD 5] Fenced blocks are removed before the paragraph split, so mermaid
+          diagram lines stop counting as sentences in long_paragraph.
+  [MOD 6] Em dashes inside **XXX-NNN --** identifier labels are exempt. They
+          are an ID convention, not prose. Override with --strict-emdash.
 
 Score is violations per 100 words. Lower is cleaner. The absolute number is
 noisy; the before/after delta on the same document is the signal.
@@ -59,6 +65,14 @@ CONTRACTION = re.compile(
 # paragraphs each.
 FENCE = re.compile(r"```.*?```", re.S)
 
+# [MOD 6] Structured identifier labels of the form **AUTH-001 — Title.** are an
+# identifier convention, not prose. One portfolio repo carries 368 of them across
+# 22 files, so counting their dash as a violation both floods the score and
+# invites a one-file rewrite that leaves the other 361 inconsistent. Changing an
+# ID convention is a deliberate repo-wide decision, not a side effect of a
+# writing rule. Disable this exemption with --strict-emdash.
+ID_LABEL_DASH = re.compile(r"(\*\*[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*-\d+\s*)[—–]")
+
 
 def strip_code(t):
     t = re.sub(r"```.*?```", " ", t, flags=re.S)
@@ -91,7 +105,7 @@ def count_ci(text, phrases):
     return n, hits
 
 
-def lint(text, mode="strict", emdash=True):
+def lint(text, mode="strict", emdash=True, id_labels_exempt=True):
     raw = text
     text = strip_code(text)
     sents = sentences(text)
@@ -115,7 +129,8 @@ def lint(text, mode="strict", emdash=True):
 
     # [MOD 2] Counted from code-stripped text so em dashes inside fenced blocks
     # and inline code do not score. The raw count stays as a reported marker.
-    em_prose = text.count("—") + text.count("–")
+    em_src = ID_LABEL_DASH.sub(r"\1", text) if id_labels_exempt else text  # [MOD 6]
+    em_prose = em_src.count("—") + em_src.count("–")
     em_raw = raw.count("—") + raw.count("–")
     if emdash:
         v["em_dash"] = em_prose
@@ -152,8 +167,11 @@ def main():
     ap.add_argument("--json", action="store_true", help="full JSON report per file")
     ap.add_argument("--no-emdash", action="store_true",
                     help="do not count em dashes as violations (they are not banned by ASD-STE100)")
+    ap.add_argument("--strict-emdash", action="store_true",
+                    help="also count em dashes inside **XXX-NNN —** identifier labels")
     a = ap.parse_args()
     emdash = not a.no_emdash
+    idx = not a.strict_emdash
 
     if not a.files:
         # [MOD 1]
@@ -161,7 +179,7 @@ def main():
             sys.stdin.reconfigure(encoding="utf-8", errors="replace")
         except Exception:
             pass
-        print(json.dumps(lint(sys.stdin.read(), a.mode, emdash), indent=2))
+        print(json.dumps(lint(sys.stdin.read(), a.mode, emdash, idx), indent=2))
         return 0
 
     exp = []
@@ -173,7 +191,7 @@ def main():
 
     for f in exp:
         try:
-            r = lint(read_text(f), a.mode, emdash)
+            r = lint(read_text(f), a.mode, emdash, idx)
         except OSError as e:
             print(f"{os.path.basename(f):32} ERROR {e}", file=sys.stderr)
             continue
