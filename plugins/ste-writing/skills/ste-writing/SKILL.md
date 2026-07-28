@@ -1,13 +1,13 @@
 ---
 name: ste-writing
-description: Rewrite prose (docs, READMEs, PR descriptions, error messages, release notes, comments — never code) into ASD-STE100 Simplified Technical English to remove "AI slop". Use when asked to make writing not sound like AI, make docs clear or plain, enforce a controlled writing style, or write technical documentation that reads human. Two modes — strict (procedures/safety) and STE-flavored (general prose).
+description: Rewrite prose (docs, READMEs, PR descriptions, error messages, release notes, comments, but never code) into ASD-STE100 Simplified Technical English to remove "AI slop". Use when asked to make writing not sound like AI, make docs clear or plain, enforce a controlled writing style, or write technical documentation that reads human. Two modes: strict (procedures/safety) and STE-flavored (general prose).
 ---
 
 # ste-writing
 
-Write prose in ASD-STE100 Simplified Technical English. This applies to documentation, READMEs, pull-request text, error messages, release notes, and comments. It does not apply to code, identifiers, or command syntax. It is not for marketing copy, essays, or anything that needs a voice — STE strips voice on purpose.
+Write prose in ASD-STE100 Simplified Technical English. This applies to documentation, READMEs, pull-request text, error messages, release notes, and comments. It does not apply to code, identifiers, or command syntax. It is not for marketing copy, essays, or anything that needs a voice. STE strips voice on purpose.
 
-**Check the repo's `CLAUDE.md` before applying this.** Repos declare which paths are governed and in which mode. Creative and narrative work is exempt by design; do not apply the standard there even if asked to "clean up" the prose.
+**Check the repo's `CLAUDE.md` before applying this.** Repos declare which paths are governed and in which mode. Creative and narrative work is exempt by design. Do not apply the standard there, even if asked to "clean up" the prose.
 
 ## Rules
 
@@ -39,8 +39,8 @@ Write only the requested text. No preamble, no summary, no closing remarks.
 
 ## Modes
 
-- **strict** — procedures, runbooks, safety text, gate criteria, error messages: apply every rule and both length caps.
-- **STE-flavored** — general prose (READMEs, PR descriptions, docs): apply the sentence, paragraph, active-voice, no-phrasal-verb, and no-em-dash discipline. Relax the contraction rule and the ~900-word dictionary lockdown so the text keeps enough range to read naturally.
+- **strict.** Procedures, runbooks, safety text, gate criteria, error messages. Apply every rule and both length caps.
+- **STE-flavored.** General prose such as READMEs, PR descriptions, and docs. Apply the sentence, paragraph, active-voice, no-phrasal-verb, and no-em-dash discipline. Relax the contraction rule and the ~900-word dictionary lockdown so the text keeps enough range to read naturally.
 
 Contractions and the dictionary are the two rules that strip voice fastest. That is correct in a runbook and wrong in a README. When in doubt, use flavored.
 
@@ -59,21 +59,21 @@ Then fix what it flags:
 1. Any sentence over 20 words? Split it.
 2. Any semicolon? Replace with a period.
 3. Any em dash or en dash? Rewrite.
-4. Any contraction? Expand it — strict mode only.
+4. Any contraction? Expand it. Strict mode only.
 5. Any passive voice with a known actor? Make it active.
 6. Any "-ing" main verb, nominalization ("perform an analysis"), or phrasal verb ("spin up")? Replace with a plain verb.
 7. Same thing named two ways? Pick one name.
 
-**The score is a delta, not a target.** The absolute number is noisy — `long_paragraph` penalizes STE's own short sentences, and `passive_voice` is a regex that flags "is interested". Compare before and after on the same document. Never rewrite a sentence solely to move the number.
+**The score is a delta, not a target.** The absolute number is noisy. `long_paragraph` penalizes STE's own short sentences, and `passive_voice` is a regex that flags "is interested". Compare before and after on the same document. Never rewrite a sentence solely to move the number.
 
 ## What this does not do
 
-The mechanical rules above are lintable and are what removes slop. Full STE also needs human judgment (the right technical noun, whether a sentence "makes good sense") — a checker cannot certify that, and slop is not about that.
+The mechanical rules above are lintable, and they are what removes slop. Full STE also needs human judgment, such as the right technical noun, or whether a sentence makes good sense. A checker cannot certify that, and slop is not about that.
 
 This skill fixes the FORM of slop. It cannot make a hollow paragraph true. A clean, confident, well-punctuated hollow paragraph is still hollow, and the standard will make it read as finished. Do not let it stand in for having something to say.
 
 ## Provenance
 
-Distilled from ASD-STE100 Issue 9, free at https://asd-ste100.org — copyrighted, so do not paste it in full.
+Distilled from ASD-STE100 Issue 9, free at https://asd-ste100.org. The standard is copyrighted, so do not paste it in full.
 
-This skill and the linter derive from the ep01 kit in https://github.com/woosal1337/blog, MIT © 2026 Ege Çelebi. See `LICENSE-upstream` at the repo root. Local changes: the em-dash rule, the mode-aware linter, UTF-8 handling, and the cross-platform launcher.
+This skill and the linter derive from the ep01 kit in https://github.com/woosal1337/blog, MIT (c) 2026 Ege Çelebi. See `LICENSE-upstream` at the repo root. Local changes: the em-dash rule, the mode-aware linter, UTF-8 handling, and the cross-platform launcher.
