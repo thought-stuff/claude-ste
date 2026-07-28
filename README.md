@@ -11,7 +11,12 @@ em dashes in it.
 
 ## Install
 
-On each machine, once. Add the marketplace to `~/.claude/settings.json`:
+Three steps, once per machine. This must go in **user** settings
+(`~/.claude/settings.json`). Project-scope `.claude/settings.json` does not
+register marketplaces, so it cannot be committed into a repo to make the step
+automatic.
+
+**1.** Add the marketplace to `~/.claude/settings.json`:
 
 ```json
 {
@@ -23,15 +28,43 @@ On each machine, once. Add the marketplace to `~/.claude/settings.json`:
 }
 ```
 
-Then install the plugin:
+**2.** Install the plugin:
 
 ```
 /plugin install ste-writing@thought-stuff
 ```
 
-Updates arrive by pulling the marketplace. There is one canonical copy of the
-skill and the linter, versioned here, rather than a hand-placed copy per
-machine.
+Or from a terminal: `claude plugin install ste-writing@thought-stuff`
+
+**3.** Verify:
+
+```sh
+sh "${CLAUDE_PLUGIN_ROOT}/scripts/selftest.sh"
+```
+
+The selftest checks the things that actually differ per machine: which Python
+exists, whether the launcher is executable, whether line endings survived the
+clone, and whether UTF-8 decodes correctly. It exits non-zero if any check
+fails. Run it on every new machine before trusting a score.
+
+Updates arrive with `claude plugin update ste-writing@thought-stuff`. There is
+one canonical copy of the skill and the linter, versioned here, rather than a
+hand-placed copy per machine.
+
+### Platform notes
+
+The interpreter name is not portable and the launcher resolves it at run time:
+
+| Platform | Working command | Broken command |
+|---|---|---|
+| macOS, Linux | `python3` | `python` is often absent |
+| Windows | `python` or `py` | `python3` is a Store stub that prints an advert and exits non-zero |
+
+Line endings are not portable either. A `.sh` file committed with CRLF fails on
+macOS and Linux with `bad interpreter: /bin/sh^M`. `.gitattributes` pins `*.sh`
+to LF, and the selftest checks for stray CR bytes.
+
+Verified on Windows against `sh`, `dash`, Python 3.12, and Python 3.13.
 
 ## Use
 
