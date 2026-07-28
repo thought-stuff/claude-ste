@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "thought-stuff",
+  "description": "Thought-Stuff writing and process tooling for Claude Code",
+  "owner": {
+    "name": "Craig McWherter",
+    "email": "craig@mcwherter.com"
+  },
+  "plugins": [
+    {
+      "name": "ste-writing",
+      "description": "ASD-STE100 Simplified Technical English for docs, PR text, error messages, and agent output. Includes a machine-checkable anti-slop linter. Strict and flavored modes.",
+      "author": {
+        "name": "Craig McWherter"
+      },
+      "category": "productivity",
+      "source": "./plugins/ste-writing"
+    }
+  ]
+}

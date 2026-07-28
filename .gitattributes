@@ -1,0 +1,7 @@
+# Shell scripts MUST be LF. A CRLF .sh fails on macOS and Linux with
+# "bad interpreter: /bin/sh^M" -- the exact cross-platform break this
+# repo exists to avoid.
+*.sh text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+*.md text eol=lf

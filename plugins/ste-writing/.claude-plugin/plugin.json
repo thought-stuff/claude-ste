@@ -1,0 +1,12 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "ste-writing",
+  "version": "0.1.0",
+  "description": "ASD-STE100 Simplified Technical English for docs, PR text, error messages, and agent output. Includes a machine-checkable anti-slop linter. Strict and flavored modes.",
+  "author": {
+    "name": "Craig McWherter",
+    "email": "craig@mcwherter.com"
+  },
+  "license": "MIT",
+  "keywords": ["writing", "documentation", "ste", "asd-ste100", "linter", "style"]
+}
