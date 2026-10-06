@@ -104,6 +104,10 @@ STE fixes the form of slop, not the substance. It turns a hollow paragraph into
 a clean, well-punctuated hollow paragraph. No linter can tell you whether a
 sentence is true or worth writing.
 
+## License
+
+MIT © 2026 Craig McWherter. See `LICENSE`.
+
 ## Credits
 
 Derived from the ep01 kit in [woosal1337/blog](https://github.com/woosal1337/blog/tree/main/videos/ep01-the-cure-for-ai-slop),
